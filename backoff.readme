@@ -1,0 +1,33 @@
+/var/securitycam/backoffseconds = 30
+ /var/securitycam/lastevent = 5000
+
+Let's say there was an event at 5001
+
+/var/securitycam/lastevent now set to 5031
+/var/securitycam/backoffseconds = 30
+..
+ignore event 5015 since it is less than /var/securitycam/lastevent
+ignore event 5020 since it is less than /var/securitycam/lastevent
+
+process event 5040... since it is greater than or equal to /var/securitycam/lastevent (5031)
+    send an alert
+	if currenttime 5040-lastevent(5031) < /var/securitycam/backoffseconds(30) (Yes)
+        then 
+            double backoffseconds... 
+            /var/securitycam/backoffseconds=*2  (=60)
+        else 
+            /var/securitycam/backoffseconds = backoffseconds_default
+    /var/securitycam/lastevent = currenttime + /var/securitycam/backoffseconds 5031+60 = 5091
+
+ignore event 5044 since it is less than /var/securitycam/lastevent (5091)
+ignore event 5080 since it is less than /var/securitycam/lastevent (5091)
+process event 5100 since it is greater than or equal to /var/securitycam/lastevent (5091)
+    send an alert
+    if currenttime 5100-lastevent(5091) = 9 < /var/securitycam/backoffseconds (60)
+        then   
+            double backoffseconds... 
+            /var/securitycam/backoffseconds=*2=          
+        else 
+            /var/securitycam/backoffseconds = backoffseconds_default
+    /var/securitycam/lastevent = currenttime + /var/securitycam/backoffseconds
+            

@@ -1,6 +1,6 @@
 #!/bin/bash
 ftproot=/ftp/jq
-hysteresis=20
+backoffseconds_default=30
 
 function mvp ()
 {
@@ -13,7 +13,12 @@ function mvp ()
 
 #initialize the security cam hysteris epoch time
 mkdir -p /var/securitycam
-date +%s > /var/securitycam/lastevent
+
+echo $backoffseconds_default > /var/securitycam/backoffseconds
+echo print backoffseconds
+cat /var/securitycam/backoffseconds
+expr `date +%s` - $backoffseconds_default > /var/securitycam/lastevent
+echo NEW EVENT MARKER: `cat /var/securitycam/lastevent`
 
 #set -x
 touch /var/log/xferlog
@@ -48,21 +53,31 @@ tail -F /var/log/xferlog | while read line; do
                   priorepoch=`cat /var/securitycam/lastevent`
                   elapsedseconds=`expr $currentepoch - $priorepoch`
                   echo "elapsedseconds " $elapsedseconds " = currentepoch[" $currentepoch "] - priorepoch [" $priorepoch "]"
-                  if [ "$elapsedseconds" -gt "$hysteresis" ];
+                  if [ "$elapsedseconds" -gt 0 ];
                             then
                                 echo `date +"%Y-%m-%dT%H:%M:%SZ"` "-" $camera "-Mark New LastEvent"
-				yolophoto=$filename.yolo.jpg
-				ls $filename.yolo.jpg
-                                date +%s > /var/securitycam/lastevent
-                                curl -s --form-string "token=$pushtoken" \
-                                        --form-string "user=$pushuser" \
-                                        --form-string "title=PERSON DETECTED $camera" \
-                                        --form-string "message=`cat $filename.yolo.objects`" \
-					-F "attachment=@$yolophoto" \
-				         https://api.pushover.net/1/messages.json 
-                                echo ""
+				                yolophoto=$filename.yolo.jpg
+				                ls $filename.yolo.jpg
+                                backoffseconds=`cat /var/securitycam/backoffseconds`
+                                if [ "$elapsedseconds" -lt "$backoffseconds" ];
+                                    then 
+                                        echo Double Backoff Seconds timer `cat /var/securitycam/backoffseconds`
+                                        expr `cat /var/securitycam/backoffseconds` \* 2 > /var/securitycam/backoffseconds
+                                    else
+                                        echo Reset Backoff Seconds timer to default
+                                        echo $backoffseconds_default > /var/securitycam/backoffseconds
+                                fi
+                                #Set the backoff timer to a future time based on backoffseconds like a TTL
+                                expr `date +%s` + `cat /var/securitycam/backoffseconds` > /var/securitycam/lastevent
+                                echo NEW EVENT MARKER: `cat /var/securitycam/lastevent`
+                              #  curl -s --form-string "token=$pushtoken" \
+                              #          --form-string "user=$pushuser" \
+                              #          --form-string "title=PERSON DETECTED $camera" \
+                              #          --form-string "message=`cat $filename.yolo.objects`" \
+                              #          -F "attachment=@$yolophoto" \
+                              #              https://api.pushover.net/1/messages.json   
                             else
-                                echo `date +"%Y-%m-%dT%H:%M:%SZ"` "-" $camera "-IGNORING EVENT - STILL IN HYSTERSIS SECS " $elapsedseconds
+                                echo `date +"%Y-%m-%dT%H:%M:%SZ"` "-" $camera "-IGNORING EVENT - WAITING TILL FOR BACKOFF SECS " $elapsedseconds
                             fi
               else
                   echo `date +"%Y-%m-%dT%H:%M:%SZ"`i "-" $camera  "-IGNORE MOTION DETECTED" `cat $filename.yolo.objects`
