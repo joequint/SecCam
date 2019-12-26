@@ -1,6 +1,8 @@
 #!/bin/bash
+
 ftproot=/ftp/jq
 backoffseconds_default=30
+cd /bin
 
 function mvp ()
 {
@@ -36,16 +38,16 @@ tail -F /var/log/xferlog | while read line; do
           echo `date +"%Y-%m-%dT%H:%M:%SZ"` "NEW FILE: " $filename
 	  if echo $basefilename | grep -q '.264$'; then
 		  basefilenameregex=`(echo "$basefilename" | sed -e 's/record\///')`
-#	     echo "basefilenameregex: " $basefilenameregex
+	     echo "basefilenameregex: " $basefilenameregex
              ffmpeg -framerate 24  -i $filename -c copy $filename.mp4
 	     mvp $filename.mp4 $videodir$basefilenameregex.mp4
 	  fi
 	  if echo $basefilename | grep -q '.jpg$'; then
-          python3 xferdetect.py $filename
+          /usr/bin/python3 /bin/xferdetect.py $filename
           if grep -q -e 'person' $filename.yolo.objects;
 		  basefilenameregex=`(echo "$basefilename" | sed -e 's/images\///')`
-#	     echo "basefilename: " $basefilename
-#	     echo "basefilenameregex: " $basefilenameregex
+	     echo "basefilename: " $basefilename
+	     echo "basefilenameregex: " $basefilenameregex
               mvp $filename $photodir$basefilenameregex
               then
                   echo `date +"%Y-%m-%dT%H:%M:%SZ"` "-" $camera "-PERSON DETECTED!"

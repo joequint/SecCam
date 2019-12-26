@@ -27,4 +27,4 @@ EXPOSE 21 21000-21100
 #VOLUME /ftp/ftp
 #VOLUME /amazonphotos
 
-ENTRYPOINT ["/bin/start_vsftpd.sh &"]
+ENTRYPOINT /bin/start_vsftpd.sh
