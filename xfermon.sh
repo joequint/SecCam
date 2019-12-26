@@ -72,12 +72,12 @@ tail -F /var/log/xferlog | while read line; do
                                 #Set the backoff timer to a future time based on backoffseconds like a TTL
                                 expr `date +%s` + `cat /var/securitycam/backoffseconds` > /var/securitycam/lastevent
                                 echo NEW EVENT MARKER: `cat /var/securitycam/lastevent`
-                              #  curl -s --form-string "token=$pushtoken" \
-                              #          --form-string "user=$pushuser" \
-                              #          --form-string "title=PERSON DETECTED $camera" \
-                              #          --form-string "message=`cat $filename.yolo.objects`" \
-                              #          -F "attachment=@$yolophoto" \
-                              #              https://api.pushover.net/1/messages.json   
+                                curl -s --form-string "token=$pushtoken" \
+                                        --form-string "user=$pushuser" \
+                                        --form-string "title=PERSON DETECTED $camera" \
+                                        --form-string "message=`cat $filename.yolo.objects`" \
+                                        -F "attachment=@$yolophoto" \
+                                            https://api.pushover.net/1/messages.json   
                             else
                                 echo `date +"%Y-%m-%dT%H:%M:%SZ"` "-" $camera "-IGNORING EVENT - WAITING TILL FOR BACKOFF SECS " $elapsedseconds
                             fi
