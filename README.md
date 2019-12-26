@@ -4,6 +4,10 @@ All in one docker container that will recieve FTP photo and video pushes from a 
 ## Motivation
 Ring, Nest, Amazon Cloud Cam, ARLO are all expensive for either the hardware or monthly service especially if you have more than a few cameras.  I personally still have a ring camera but that is more for backup to all that I am showing here. Additionally, I needed exponential backoff for the entire camera vision so I don't get spammed when my kids are playing basketball or I'm mowing the yard.  Lastly, I have alot of wildlife that roams my property and I don't need to get notified when a dear, turkey, or coyote are lurking about. 
 
+## Architecture
+![Archictecture Diagram](https://github.com/joequint/SecCam/blob/master/SecurityCam.png "Archictecture")
+
+
 ## Prerequisites/setup
 * Create a local directory c:/tmp/AmazonPhotos (or see configuration)
 * Download and install [Amazon Photos](https://www.amazon.com/Amazon-Photos/b?ie=UTF8&node=13234696011 "Amazon Photos's Homepage") or Google Drive or One Drive or DropBox, or preferred cloud sync tool. **_Sync it to the local directory above._**
